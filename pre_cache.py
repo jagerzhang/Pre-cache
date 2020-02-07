@@ -126,12 +126,12 @@ class preCache():
                                size=self.size,
                                exception_handler=self.exception_handler)
         count = len(result)
+        hit_count = 0
+        miss_count = 0
+        none_count = 0
+        noheader_count = 0
+        exception_count = 0
         if self.cache_header:
-            hit_count = 0
-            miss_count = 0
-            none_count = 0
-            noheader_count = 0
-            exception_count = 0
             for r in result:
                 flag = 0
                 try:
