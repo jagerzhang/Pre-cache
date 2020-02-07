@@ -50,25 +50,27 @@ class preCache():
     timeout: 单个请求的超时时间
     verify: 是否验证SSL证书，选择IP请求方式时必须关闭
     """
-    def __init__(self,
-                 baseurl="http://loalhost",
-                 host=None,
-                 sitemap="sitemap.xml",
-                 cache_header=None,
-                 user_agent="Pre Cache Tools",
-                 size=20,
-                 timeout=5,
-                 verify=False):
+
+    def __init__(self, baseurl="http://loalhost", host=None, sitemap="sitemap.xml",
+                 cache_header=None, user_agent=None, size=20, timeout=5, verify=False):
+        self.report = Colors()
+        self.scheme = urlparse(baseurl).scheme
+        self.server = urlparse(baseurl).netloc
+        if not self.scheme or not self.server:
+            self.report.red("入口网址解析失败：%s，请检查！" % baseurl)
+            return False
         self.size = size
         self.verify = verify
         self.timeout = timeout
-        self.baseurl = baseurl
+        self.baseurl = "%s://%s" % (self.scheme,self.server)
         self.start_time = time.time()
         self.session = requests.Session()
         self.cache_header = cache_header
-        self.server = urlparse(baseurl).netloc
+        self.headers = {}
         self.user_agent = user_agent
-        self.headers = {"user-agent": user_agent}
+        if not user_agent:
+            self.user_agent = "Pre-cache/python-requests/%s" % requests.__version__
+        self.headers["user-agent"] = self.user_agent
         self.sitemap_url = "%s/%s" % (self.baseurl, sitemap)
         if not self.verify:
             urllib3.disable_warnings()
@@ -78,23 +80,19 @@ class preCache():
             self.host = self.server
 
         self.headers["Host"] = self.host
-        self.report = Colors()
+        
 
     def exception_handler(self, request, exception):
         print("请求异常：%s,%s" % (str(request.url), exception))
 
     def get_urls(self):
-        sitemap = self.session.get(self.sitemap_url,
-                                   headers=self.headers,
-                                   timeout=self.timeout,
-                                   verify=self.verify).text
+        sitemap = self.session.get(self.sitemap_url, headers=self.headers,
+                                   timeout=self.timeout, verify=self.verify).text
         urls = []
         for url in xmltodict.parse(sitemap)["urlset"]["url"]:
             if self.host:
-                urls.append(url["loc"].replace(
-                    "%s://%s" %
-                    (urlparse(url["loc"]).scheme, urlparse(url["loc"]).netloc),
-                    self.baseurl))
+               urls.append(url["loc"].replace("%s://%s" % (urlparse(url["loc"]).scheme, urlparse(
+                   url["loc"]).netloc), self.baseurl))
             else:
                 urls.append(url["loc"])
         return urls
@@ -103,19 +101,16 @@ class preCache():
         self.report.normal("网站首页：%s" % self.baseurl)
         self.report.normal("站点地图：%s" % self.sitemap_url)
         self.report.normal("Host头部：%s" % self.host)
+        self.report.normal("并发数量：%s" % self.size)
         self.report.normal("超时时间：%s秒" % self.timeout)
         self.report.normal("缓存标识：%s" % self.cache_header)
-        self.report.normal("并发数量：%s" % self.size)
-        self.report.normal("UA 标识：%s" % self.user_agent)
-        self.report.normal("预缓存开始:\n---------------------------------------")
+        self.report.normal("UA  标识：%s" % self.user_agent)
+        self.report.blue("预缓存开始:")
+        self.report.normal("---------------------------------------------------------")
         urls = self.get_urls()
-        req = (grequests.get(url,
-                             headers=self.headers,
-                             timeout=self.timeout,
-                             session=self.session,
-                             verify=self.verify) for url in urls)
-        result = grequests.map(req,
-                               size=self.size,
+        req = (grequests.get(url, headers=self.headers,
+                             timeout=self.timeout, session=self.session, verify=self.verify) for url in urls)
+        result = grequests.map(req, size=self.size,
                                exception_handler=self.exception_handler)
         count = len(result)
         if self.cache_header:
@@ -137,26 +132,22 @@ class preCache():
                         flag += 1
                         if status.upper() == "HIT":
                             hit_count += 1
-                        elif status.upper() == "MISS" or status.upper(
-                        ) == "EXPIRED":
-                            self.report.green(
-                                "可预缓存页面：%s " %
-                                str(r.url).replace(self.server, self.host))
+                        elif status.upper() == "MISS" or status.upper() == "EXPIRED":
+                            self.report.green("可预缓存页面：%s，缓存标识头：%s" % (
+                                              str(r.url).replace(self.server, self.host),str(status)))
                             miss_count += 1
                         else:
                             none_count += 1
-                            self.report.red(
-                                "不可缓存页面：%s，缓存状态：%s " % (str(r.url).replace(
-                                    self.server, self.host), str(status)))
+                            self.report.red("不可缓存页面：%s，缓存标识头：%s" %
+                                            (str(r.url).replace(self.server, self.host), str(status)))
                 if flag == 0:
-                    self.report.yellow(
-                        "未找到缓存标识头部：%s " %
-                        str(r.url).replace(self.server, self.host))
+                    self.report.yellow("缓存标识头缺失页面：%s " %
+                                       str(r.url).replace(self.server, self.host))
                     noheader_count += 1
 
-        self.report.normal(
-            "---------------------------------------\n预缓存完成，页面总数：% s，耗时% s秒" %
-            (count, int(time.time() - self.start_time)))
+        self.report.normal("---------------------------------------------------------")
+        self.report.blue("预缓存完成，页面总数：% s，耗时% s秒" %
+                           (count, int(time.time() - self.start_time)))
         if hit_count > 0:
             self.report.green("已被缓存页面数：%s" % hit_count)
         if miss_count > 0:
@@ -166,15 +157,12 @@ class preCache():
         if exception_count > 0:
             self.report.red("请求异常页面数：%s" % exception_count)
         if noheader_count > 0:
-            self.report.yellow("缓存头部标识缺失页面数：%s" % noheader_count)
+            self.report.yellow("缓存标识头缺失页面数：%s" % noheader_count)
         if hit_count + miss_count == 0:
             if self.cache_header:
-                self.report.yellow("指定的缓存命中头部 %s 可能不对，未能找到这个头部信息." %
-                                   self.cache_header)
+                self.report.yellow("指定的缓存标识头 %s 可能不对，未能找到这个头信息." % self.cache_header)
             else:
-                self.report.normal(
-                    "Ps：如果指定了缓存命中的头部信息，将会显示更多统计信息，比如加上：--cacheheader=x-cache")
-
+                self.report.normal("Ps：如果指定了缓存命中的头信息，将会显示更多统计信息，比如加上：--cacheheader=x-cache")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="网站预缓存脚本，支持使用CDN或本地有静态缓存的网站.")
@@ -211,8 +199,8 @@ if __name__ == "__main__":
     parser.add_argument("-U",
                         "--useragent",
                         type=str,
-                        default="Pre Cache Tools",
-                        help="指定UA标识，默认Pre Cache Tools ")
+                        default=None,
+                        help="指定UA标识，默认 Pre-cache/python-requests/__version__")
     parser.add_argument("-v",
                         "--verify",
                         type=bool,
