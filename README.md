@@ -31,7 +31,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -s SITEMAP, --sitemap SITEMAP
                         网站地图sitemap地址
-  -S SIZE, --size SIZE  并发请求数量,默认50
+  -S SIZE, --size SIZE  并发请求数量,默认20
   -t TIMEOUT, --timeout TIMEOUT
                         单个请求的超时时间,默认10s
   -H HOST, --host HOST  指定真实主机，比如 127.0.0.1:8080
