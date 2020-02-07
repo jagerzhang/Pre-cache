@@ -11,7 +11,7 @@ docker run --rm --net=host -ti jagerzhang/pre-cache:latest \
 ```
 
 ## 直接运行脚本
-### 环境初始化
+### 环境初始化：
 ```
 git clone https://github.com/jagerzhang/Pre-cache.git
 cd Pre-cache
@@ -68,7 +68,7 @@ python pre_cache.py \
    --cacheheader=cf-cache-status \
    --useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36"
 ```
-### 脚本引用
+### 对象引用：
 ```
 from pre_cache import preCache
 pre = preCache(sitemap="https://zhang.ge/sitemap.xml",
