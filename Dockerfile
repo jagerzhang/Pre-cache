@@ -6,8 +6,11 @@ RUN rm -rf /etc/yum.repos.d/* \
         && rpm --import http://mirrors.163.com/centos/RPM-GPG-KEY-CentOS-7 \
         && yum clean all  \
         && yum makecache \
-        && yum install -y python-pip
+        && yum install -y python-pip \
+	&& yum clean all \
+	&& rm -rf /var/cache/yum/*
 RUN pip install --upgrade pip -i https://mirrors.aliyun.com/pypi/simple/
 COPY . .
-RUN pip install -r /opt/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ 
+RUN pip install -r /opt/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ \
+    && rm -rf ~/.cache/pip/* 
 ENTRYPOINT ["/usr/bin/python","/opt/pre_cache.py"]
