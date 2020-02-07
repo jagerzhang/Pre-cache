@@ -51,13 +51,21 @@ python pre_cache.py \
    --cacheheader=cf-cache-status
 ```
 
-### 指定IP缓存：
+### 指定真实主机：
 ```
 # 可以指定IP+Host域名可以绕过CDN，直接请求源站，实现源站本地缓存
 python pre_cache.py \
-   --sitemap=https://zhang.ge/sitemap.xml\
-   --host=127.0.0.1:8443\
+   --sitemap=https://zhang.ge/sitemap.xml \
+   --host=127.0.0.1:8443 \
    --cacheheader=x-cache-redis
+```
+### 指定UA标识：
+```
+# 可以指定IP+Host域名可以绕过CDN，直接请求源站，实现源站本地缓存
+python pre_cache.py \
+   --sitemap=https://zhang.ge/sitemap.xml \
+   --cacheheader=cf-cache-status \
+   --useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36"
 ```
 ### 脚本引用
 ```
