@@ -61,7 +61,7 @@ python pre_cache.py \
 ```
 ### 指定UA标识：
 ```
-# 可以指定IP+Host域名可以绕过CDN，直接请求源站，实现源站本地缓存
+# 可以指定UA标识，伪装浏览器或其他客户端请求，避免被CDN拦截
 python pre_cache.py \
    --sitemap=https://zhang.ge/sitemap.xml \
    --cacheheader=cf-cache-status \
