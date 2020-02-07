@@ -44,6 +44,14 @@ python pre_cache.py --url=https://zhang.ge --cacheheader=cf-cache-status
 python pre_cache.py --url=https://127.0.0.1 --host=zhang.ge --cacheheader=cf-cache-status
 ```
 
+### 基于Docker运行
+```
+docker run --rm --net=host -ti jagerzhang/pre-cache:latest \
+    --url=https://127.0.0.1 \
+    --host=zhang.ge \
+    --cacheheader=cf-cache-status
+```
+
 ### 脚本引用
 ```
 from pre_cache import preCache()
