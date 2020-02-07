@@ -35,13 +35,18 @@ optional arguments:
 
 ### 快速使用：
 ```
-python pre_cache.py --sitemap=https://zhang.ge/sitemap.xml --cacheheader=cf-cache-status
+python pre_cache.py \
+   --sitemap=https://zhang.ge/sitemap.xml \
+   --cacheheader=cf-cache-status
 ```
 
 ### 指定IP缓存：
 ```
 # 可以指定IP+Host域名可以绕过CDN，直接请求源站，实现源站本地缓存
-python pre_cache.py --sitemap=https://zhang.ge/sitemap.xml --host=127.0.0.1:8443 --cacheheader=x-cache-redis
+python pre_cache.py \
+   --sitemap=https://zhang.ge/sitemap.xml\
+   --host=127.0.0.1:8443\
+   --cacheheader=x-cache-redis
 ```
 
 ### 基于Docker运行
@@ -53,7 +58,7 @@ docker run --rm --net=host -ti jagerzhang/pre-cache:latest \
 
 ### 脚本引用
 ```
-from pre_cache import preCache()
+from pre_cache import preCache
 pre = preCache(sitemap="https://zhang.ge/sitemap.xml",
                    host=None,
                    size=10,
