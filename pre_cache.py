@@ -41,7 +41,7 @@ class Colors():
 
 class preCache():
     """
-    sitemap: 网站地图sitemap文件的url路径，比如 https://yourdomain.comsitemmap.xml
+    sitemap: 网站地图sitemap文件的url路径，比如 https://yourdomain.com/sitemmap.xml
     host: 指定真实主机，比如 127.0.0.1 或 127.0.0.1:8080 
     cache_header: 指定缓存命中的头部信息，比如 x-cache (大小写均可)
     user_agent: 指定请求时发送到服务器的User Agent标识
@@ -55,7 +55,7 @@ class preCache():
                  cache_header=None,
                  user_agent=None,
                  size=20,
-                 timeout=10,
+                 timeout=5,
                  verify=False):
         self.report = Colors()
         self.scheme = urlparse(sitemap).scheme
@@ -107,7 +107,8 @@ class preCache():
         except:
             pass
         self.report.normal("站点地图：%s" % self.sitemap_url)
-        self.report.normal("指定主机：%s" % self.host)
+        if self.host:
+            self.report.normal("指定主机：%s" % self.host)
         self.report.normal("并发数量：%s" % self.size)
         self.report.normal("超时时间：%s秒" % self.timeout)
         self.report.normal("缓存标识：%s" % self.cache_header)
@@ -194,8 +195,8 @@ if __name__ == "__main__":
     parser.add_argument("-S",
                         "--size",
                         type=int,
-                        default=20,
-                        help="并发请求数量,默认20")
+                        default=50,
+                        help="并发请求数量,默认50")
     parser.add_argument("-t",
                         "--timeout",
                         type=int,

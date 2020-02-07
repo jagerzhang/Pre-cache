@@ -1,4 +1,4 @@
-FROM centos:7.2.1511
+FROM centos:7
 WORKDIR /opt/
 RUN rm -rf /etc/yum.repos.d/* \
         && curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.163.com/.help/CentOS7-Base-163.repo \
@@ -10,5 +10,4 @@ RUN rm -rf /etc/yum.repos.d/* \
 RUN pip install --upgrade pip -i https://mirrors.aliyun.com/pypi/simple/
 COPY . .
 RUN pip install -r /opt/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ 
-ENTRYPOINT ["python"]
-CMD ["/opt/pre_cache.py"]
+CMD ["/usr/bin/python","/opt/pre_cache.py"]
