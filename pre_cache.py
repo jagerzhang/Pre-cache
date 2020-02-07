@@ -89,17 +89,17 @@ class preCache():
                                    timeout=self.timeout,
                                    verify=self.verify).text
         urls = []
-        for url in xmltodict.parse(sitemap)["urlset"]["url"]:
+        for u in xmltodict.parse(sitemap)["urlset"]["url"]:
+            url = u["loc"]
+            scheme = urlparse(url).scheme
+            domain = urlparse(url).netloc
             if self.host:
-                urls.append(url["loc"].replace(
-                    "%s://%s" %
-                    (urlparse(url["loc"]).scheme, urlparse(url["loc"]).netloc),
-                    "%s://%s" % (self.scheme, self.host)))
+                url = url.replace("%s://%s" % (scheme, domain),
+                                  "%s://%s" % (self.scheme, self.host))
             else:
-                urls.append(url["loc"].replace(
-                    "%s://%s" %
-                    (urlparse(url["loc"]).scheme, urlparse(url["loc"]).netloc),
-                    "%s://%s" % (self.scheme, self.domain)))
+                url = url.replace("%s://%s" % (scheme, domain),
+                                  "%s://%s" % (self.scheme, self.domain))
+            urls.append(url)
         return urls
 
     def start(self):
