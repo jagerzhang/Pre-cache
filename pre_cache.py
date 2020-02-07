@@ -42,7 +42,7 @@ class Colors():
 class preCache():
     """
     sitemap: 网站地图sitemap文件的url路径，比如 https://yourdomain.com/sitemmap.xml
-    host: 指定真实主机，比如 127.0.0.1 或 127.0.0.1:8080 
+    host: 指定真实主机，比如 127.0.0.1 或 127.0.0.1:8080
     cache_header: 指定缓存命中的头部信息，比如 x-cache (大小写均可)
     user_agent: 指定请求时发送到服务器的User Agent标识
     size: 并发请求大小，注意并非越大越好
@@ -94,9 +94,12 @@ class preCache():
                 urls.append(url["loc"].replace(
                     "%s://%s" %
                     (urlparse(url["loc"]).scheme, urlparse(url["loc"]).netloc),
-                    self.baseurl))
+                    "%s://%s" % (self.scheme, self.host)))
             else:
-                urls.append(url["loc"])
+                urls.append(url["loc"].replace(
+                    "%s://%s" %
+                    (urlparse(url["loc"]).scheme, urlparse(url["loc"]).netloc),
+                    "%s://%s" % (self.scheme, self.domain)))
         return urls
 
     def start(self):
@@ -140,6 +143,10 @@ class preCache():
                     exception_count += 1
                     continue
 
+                url = str(r.url)
+                if self.host:
+                    url = url.replace(self.host, self.domain)
+
                 for header, status in headers.items():
                     if header.upper() == self.cache_header.upper():
                         flag += 1
@@ -147,19 +154,15 @@ class preCache():
                             hit_count += 1
                         elif status.upper() == "MISS" or status.upper(
                         ) == "EXPIRED":
-                            self.report.green(
-                                "可预缓存页面：%s，缓存标识头：%s" % (str(r.url).replace(
-                                    self.host, self.domain), str(status)))
+                            self.report.green("可预缓存页面：%s，缓存标识头：%s" %
+                                              (url, str(status)))
                             miss_count += 1
                         else:
                             none_count += 1
-                            self.report.red(
-                                "不可缓存页面：%s，缓存标识头：%s" % (str(r.url).replace(
-                                    self.host, self.domain), str(status)))
+                            self.report.red("不可缓存页面：%s，缓存标识头：%s" %
+                                            (url, str(status)))
                 if flag == 0:
-                    self.report.yellow(
-                        "缓存标识头缺失页面：%s " %
-                        str(r.url).replace(self.host, self.domain))
+                    self.report.yellow("缓存标识头缺失页面：%s " % url)
                     noheader_count += 1
 
         self.report.normal(
