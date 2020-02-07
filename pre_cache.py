@@ -41,76 +41,88 @@ class Colors():
 
 class preCache():
     """
-    baseurl: 入口网址，一般为首页,不带最后的斜杠,比如 http://yourdomain.com
-    host: 指定Host访问，支持指定IP请求,比如 yourdomain.com
-    sitemap: 指定sitemap文件的path路径，不加开头的斜杠，比如 sitemmap.xml 或 blog/sitemap.xml
+    sitemap: 网站地图sitemap文件的url路径，比如 https://yourdomain.comsitemmap.xml
+    host: 指定真实主机，比如 127.0.0.1 或 127.0.0.1:8080 
     cache_header: 指定缓存命中的头部信息，比如 x-cache (大小写均可)
     user_agent: 指定请求时发送到服务器的User Agent标识
     size: 并发请求大小，注意并非越大越好
     timeout: 单个请求的超时时间
     verify: 是否验证SSL证书，选择IP请求方式时必须关闭
     """
-
-    def __init__(self, baseurl="http://loalhost", host=None, sitemap="sitemap.xml",
-                 cache_header=None, user_agent=None, size=20, timeout=5, verify=False):
+    def __init__(self,
+                 sitemap="http://loalhost/sitemap.xml",
+                 host=None,
+                 cache_header=None,
+                 user_agent=None,
+                 size=20,
+                 timeout=10,
+                 verify=False):
         self.report = Colors()
-        self.scheme = urlparse(baseurl).scheme
-        self.server = urlparse(baseurl).netloc
-        if not self.scheme or not self.server:
-            self.report.red("入口网址解析失败：%s，请检查！" % baseurl)
-            return False
+        self.scheme = urlparse(sitemap).scheme
+        self.domain = urlparse(sitemap).netloc
+        if not self.scheme or not self.domain:
+            self.check_fault = True
+        self.host = host
         self.size = size
         self.verify = verify
         self.timeout = timeout
-        self.baseurl = "%s://%s" % (self.scheme,self.server)
         self.start_time = time.time()
         self.session = requests.Session()
         self.cache_header = cache_header
         self.headers = {}
+        self.baseurl = "%s://%s" % (self.scheme, self.host)
         self.user_agent = user_agent
         if not user_agent:
             self.user_agent = "Pre-cache/python-requests/%s" % requests.__version__
         self.headers["user-agent"] = self.user_agent
-        self.sitemap_url = "%s/%s" % (self.baseurl, sitemap)
+        self.sitemap_url = sitemap
         if not self.verify:
             urllib3.disable_warnings()
-        if host:
-            self.host = host
-        else:
-            self.host = self.server
-
-        self.headers["Host"] = self.host
-        
+        self.headers["Host"] = self.domain
 
     def exception_handler(self, request, exception):
         print("请求异常：%s,%s" % (str(request.url), exception))
 
     def get_urls(self):
-        sitemap = self.session.get(self.sitemap_url, headers=self.headers,
-                                   timeout=self.timeout, verify=self.verify).text
+        sitemap = self.session.get(self.sitemap_url,
+                                   headers=self.headers,
+                                   timeout=self.timeout,
+                                   verify=self.verify).text
         urls = []
         for url in xmltodict.parse(sitemap)["urlset"]["url"]:
             if self.host:
-               urls.append(url["loc"].replace("%s://%s" % (urlparse(url["loc"]).scheme, urlparse(
-                   url["loc"]).netloc), self.baseurl))
+                urls.append(url["loc"].replace(
+                    "%s://%s" %
+                    (urlparse(url["loc"]).scheme, urlparse(url["loc"]).netloc),
+                    self.baseurl))
             else:
                 urls.append(url["loc"])
         return urls
 
     def start(self):
-        self.report.normal("网站首页：%s" % self.baseurl)
+        try:
+            self.check_fault
+            self.report.red("网站地图Url解析失败：%s，请检查！" % self.sitemap_url)
+            return False
+        except:
+            pass
         self.report.normal("站点地图：%s" % self.sitemap_url)
-        self.report.normal("Host头部：%s" % self.host)
+        self.report.normal("指定主机：%s" % self.host)
         self.report.normal("并发数量：%s" % self.size)
         self.report.normal("超时时间：%s秒" % self.timeout)
         self.report.normal("缓存标识：%s" % self.cache_header)
         self.report.normal("UA  标识：%s" % self.user_agent)
         self.report.blue("预缓存开始:")
-        self.report.normal("---------------------------------------------------------")
+        self.report.normal(
+            "---------------------------------------------------------")
         urls = self.get_urls()
-        req = (grequests.get(url, headers=self.headers,
-                             timeout=self.timeout, session=self.session, verify=self.verify) for url in urls)
-        result = grequests.map(req, size=self.size,
+        req = (grequests.get(url,
+                             headers=self.headers,
+                             timeout=self.timeout,
+                             session=self.session,
+                             verify=self.verify) for url in urls)
+        result = grequests.map(req,
+                               size=self.size,
                                exception_handler=self.exception_handler)
         count = len(result)
         if self.cache_header:
@@ -132,22 +144,27 @@ class preCache():
                         flag += 1
                         if status.upper() == "HIT":
                             hit_count += 1
-                        elif status.upper() == "MISS" or status.upper() == "EXPIRED":
-                            self.report.green("可预缓存页面：%s，缓存标识头：%s" % (
-                                              str(r.url).replace(self.server, self.host),str(status)))
+                        elif status.upper() == "MISS" or status.upper(
+                        ) == "EXPIRED":
+                            self.report.green(
+                                "可预缓存页面：%s，缓存标识头：%s" % (str(r.url).replace(
+                                    self.host, self.domain), str(status)))
                             miss_count += 1
                         else:
                             none_count += 1
-                            self.report.red("不可缓存页面：%s，缓存标识头：%s" %
-                                            (str(r.url).replace(self.server, self.host), str(status)))
+                            self.report.red(
+                                "不可缓存页面：%s，缓存标识头：%s" % (str(r.url).replace(
+                                    self.host, self.domain), str(status)))
                 if flag == 0:
-                    self.report.yellow("缓存标识头缺失页面：%s " %
-                                       str(r.url).replace(self.server, self.host))
+                    self.report.yellow(
+                        "缓存标识头缺失页面：%s " %
+                        str(r.url).replace(self.host, self.domain))
                     noheader_count += 1
 
-        self.report.normal("---------------------------------------------------------")
+        self.report.normal(
+            "---------------------------------------------------------")
         self.report.blue("预缓存完成，页面总数：% s，耗时% s秒" %
-                           (count, int(time.time() - self.start_time)))
+                         (count, int(time.time() - self.start_time)))
         if hit_count > 0:
             self.report.green("已被缓存页面数：%s" % hit_count)
         if miss_count > 0:
@@ -160,22 +177,25 @@ class preCache():
             self.report.yellow("缓存标识头缺失页面数：%s" % noheader_count)
         if hit_count + miss_count == 0:
             if self.cache_header:
-                self.report.yellow("指定的缓存标识头 %s 可能不对，未能找到这个头信息." % self.cache_header)
+                self.report.yellow("指定的缓存标识头 %s 可能不对，未能找到这个头信息." %
+                                   self.cache_header)
             else:
-                self.report.normal("Ps：如果指定了缓存命中的头信息，将会显示更多统计信息，比如加上：--cacheheader=x-cache")
+                self.report.normal(
+                    "Ps：如果指定了缓存命中的头信息，将会显示更多统计信息，比如加上：--cacheheader=x-cache")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="网站预缓存脚本，支持使用CDN或本地有静态缓存的网站.")
-    parser.add_argument("-u",
-                        "--url",
+    parser.add_argument("-s",
+                        "--sitemap",
                         type=str,
                         required=True,
-                        help="网站入口地址，一般为首页地址")
-    parser.add_argument("-s",
+                        help="网站地图sitemap地址")
+    parser.add_argument("-S",
                         "--size",
                         type=int,
-                        default=50,
-                        help="并发请求数量,默认50")
+                        default=20,
+                        help="并发请求数量,默认20")
     parser.add_argument("-t",
                         "--timeout",
                         type=int,
@@ -185,12 +205,7 @@ if __name__ == "__main__":
                         "--host",
                         type=str,
                         default=None,
-                        help="指定Host头部")
-    parser.add_argument("-S",
-                        "--sitemap",
-                        type=str,
-                        default="sitemap.xml",
-                        help="sitemap的url路径，默认sitemap.xml")
+                        help="指定真实主机，比如 127.0.0.1:8080")
     parser.add_argument("-c",
                         "--cacheheader",
                         type=str,
@@ -207,11 +222,10 @@ if __name__ == "__main__":
                         default=False,
                         help="是否校验SSL，默认不校验")
     args = parser.parse_args()
-    pre = preCache(baseurl=args.url,
+    pre = preCache(sitemap=args.sitemap,
                    host=args.host,
                    size=args.size,
                    timeout=args.timeout,
-                   sitemap=args.sitemap,
                    cache_header=args.cacheheader,
                    user_agent=args.useragent,
                    verify=args.verify)
