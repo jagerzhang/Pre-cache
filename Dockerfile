@@ -10,4 +10,4 @@ RUN rm -rf /etc/yum.repos.d/* \
 RUN pip install --upgrade pip -i https://mirrors.aliyun.com/pypi/simple/
 COPY . .
 RUN pip install -r /opt/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ 
-CMD ["/usr/bin/python","/opt/pre_cache.py"]
+ENTRYPOINT ["/usr/bin/python","/opt/pre_cache.py"]
