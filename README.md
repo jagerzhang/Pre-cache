@@ -11,6 +11,7 @@ docker run --rm --net=host -ti jagerzhang/pre-cache:latest \
 ```
 
 ## 直接运行脚本
+### 环境初始化
 ```
 git clone https://github.com/jagerzhang/Pre-cache.git
 cd Pre-cache
