@@ -1,5 +1,5 @@
 # Pre-cache
-网站预缓存脚本，全量拉去sitemap里面的网址来实现预缓存，支持使用CDN或本地有静态缓存的网站。
+网站预缓存脚本，全量拉取sitemap里面的网址来实现预缓存，支持使用CDN或本地有静态缓存的网站。
 
 # 使用说明：
 ```
@@ -42,6 +42,13 @@ python pre_cache.py --url=https://zhang.ge --cacheheader=cf-cache-status
 ```
 # 可以指定IP+Host域名可以绕过CDN，直接请求源站，实现源站本地缓存
 python pre_cache.py --url=https://127.0.0.1 --host=zhang.ge --cacheheader=cf-cache-status
+```
+
+### 基于Docker运行
+```
+docker run --rm --net=host -ti jagerzhang/pre-cache:latest \
+    --url=https://zhang.ge \
+    --cacheheader=cf-cache-status
 ```
 
 ### 脚本引用
