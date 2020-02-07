@@ -55,7 +55,7 @@ class preCache():
                  cache_header=None,
                  user_agent=None,
                  size=20,
-                 timeout=5,
+                 timeout=10,
                  verify=False):
         self.report = Colors()
         self.scheme = urlparse(sitemap).scheme
@@ -195,8 +195,8 @@ if __name__ == "__main__":
     parser.add_argument("-S",
                         "--size",
                         type=int,
-                        default=50,
-                        help="并发请求数量,默认50")
+                        default=20,
+                        help="并发请求数量,默认20")
     parser.add_argument("-t",
                         "--timeout",
                         type=int,
