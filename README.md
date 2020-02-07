@@ -2,9 +2,21 @@
 网站预缓存脚本，全量拉取sitemap里面的网址来实现预缓存，支持使用CDN或本地有静态缓存的网站。
 
 # 使用说明：
+## 基于Docker运行(推荐)
+```
+# 不依赖本地环境
+docker run --rm --net=host -ti jagerzhang/pre-cache:latest \
+    --sitemap=https://zhang.ge/sitemap.xml \
+    --cacheheader=cf-cache-status
+```
+
+## 直接运行脚本
 ```
 git clone https://github.com/jagerzhang/Pre-cache.git
 cd Pre-cache
+yum install -y python-pip
+pip install --upgrade pip -i https://mirrors.aliyun.com/pypi/simple/
+pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 ```
 ### 打印帮助信息：
 ```
@@ -29,8 +41,7 @@ optional arguments:
                         指定UA标识，默认 Pre-cache/python-
                         requests/__version__
   -v VERIFY, --verify VERIFY
-                        是否校验SSL，默认不校验
-                                              
+                        是否校验SSL，默认不校验                                           
 ```
 
 ### 快速使用：
@@ -48,14 +59,6 @@ python pre_cache.py \
    --host=127.0.0.1:8443\
    --cacheheader=x-cache-redis
 ```
-
-### 基于Docker运行
-```
-docker run --rm --net=host -ti jagerzhang/pre-cache:latest \
-    --sitemap=https://zhang.ge/sitemap.xml \
-    --cacheheader=cf-cache-status
-```
-
 ### 脚本引用
 ```
 from pre_cache import preCache
