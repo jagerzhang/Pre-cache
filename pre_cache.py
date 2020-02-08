@@ -154,13 +154,13 @@ class preCache():
                             hit_count += 1
                         elif "MISS" in status.upper(
                         ) or "EXPIRED" in status.upper():
-                            self.report.green("可预缓存页面：%s 缓存标识头：%s" %
-                                              (url, str(status)))
+                            self.report.green("可预缓存页面：%s 缓存标识头：%s: %s" %
+                                              (url, str(header), str(status)))
                             miss_count += 1
                         else:
                             none_count += 1
-                            self.report.red("不可缓存页面：%s 缓存标识头：%s" %
-                                            (url, str(status)))
+                            self.report.red("不可缓存页面：%s 缓存标识头：%s: %s" %
+                                            (url, str(header), str(status)))
                 if flag == 0:
                     self.report.yellow("缓存标识头缺失页面：%s " % url)
                     noheader_count += 1
