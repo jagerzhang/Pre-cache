@@ -150,10 +150,10 @@ class preCache():
                 for header, status in headers.items():
                     if header.upper() == self.cache_header.upper():
                         flag += 1
-                        if status.upper() == "HIT":
+                        if "HIT" in status.upper():
                             hit_count += 1
-                        elif status.upper() == "MISS" or status.upper(
-                        ) == "EXPIRED":
+                        elif "MISS" in status.upper(
+                        ) or "EXPIRED" in status.upper():
                             self.report.green("可预缓存页面：%s 缓存标识头：%s" %
                                               (url, str(status)))
                             miss_count += 1
