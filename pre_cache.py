@@ -215,7 +215,7 @@ if __name__ == "__main__":
                         type=str,
                         default=None,
                         help="缓存标识，比如: x-cache")
-    parser.add_argument("-U",
+    parser.add_argument("-u",
                         "--useragent",
                         type=str,
                         default=None,
