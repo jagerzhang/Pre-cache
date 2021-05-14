@@ -7,12 +7,13 @@ import requests
 import argparse
 import xmltodict
 import grequests
-reload(sys)
-sys.setdefaultencoding("utf-8")
 try:
     from urllib.parse import urlparse
 except:
+    # For PYTHON2
     from urlparse import urlparse
+    reload(sys)
+    sys.setdefaultencoding("utf-8")
 
 
 class Colors():
