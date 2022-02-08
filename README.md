@@ -42,7 +42,8 @@ optional arguments:
                         指定UA标识，默认 Pre-cache/python-
                         requests/__version__
   -v VERIFY, --verify VERIFY
-                        是否校验SSL，默认不校验                                           
+                        是否校验SSL，默认不校验        
+  -d, --debug           显示Debug信息, 默认关闭                                   
 ```
 
 ### 快速使用：
@@ -70,8 +71,8 @@ python pre_cache.py \
 ```
 ### 对象引用：
 ```
-from pre_cache import preCache
-pre = preCache(sitemap="https://zhang.ge/sitemap.xml",
+from pre_cache import PreCache
+pre = PreCache(sitemap="https://zhang.ge/sitemap.xml",
                    host=None,
                    size=10,
                    timeout=10,
