@@ -3,11 +3,12 @@ import sys
 import json
 import time
 import re
+import grequests
 import urllib3
-import requests
 import argparse
 import xmltodict
-import grequests
+import requests
+
 try:
     from urllib.parse import urlparse
 except:
@@ -102,12 +103,28 @@ class PreCache():
         """
         print("请求异常：%s,%s" % (str(request.url), exception))
 
+    def _get_sitemap(self):
+        """拉取站点地图内容
+        """
+
+        self.report.normal("开始拉取站点地图文件：{0}".format(self.sitemap_url))
+        resp = requests.get(self.sitemap_url, timeout=self.timeout)
+
+        if resp.status_code != 200:
+            self.report.red("拉取站点地图失败：HTTP状态码：{0}，返回内容：{1}".format(
+                resp.status_code, resp.text))
+            exit(1)
+
+        self.report.normal("拉取站点地图文件成功！\n")
+        self.report.normal("开始解析站点地图文件...")
+
+        return resp.text
+
     def _get_urls(self):
         """通过解析XML来提取网址
         """
-        sitemap = self.session.get(self.sitemap_url,
-                                   timeout=self.timeout,
-                                   verify=self.verify).text
+
+        sitemap = self._get_sitemap()
 
         urls = []
         for u in xmltodict.parse(sitemap)["urlset"]["url"]:
@@ -129,11 +146,7 @@ class PreCache():
     def _get_urls_re(self):
         """正则解析提取网址
         """
-        self.report.normal("拉取站点地图文件：{0}".format(self.sitemap_url))
-        sitemap = self.session.get(self.sitemap_url,
-                                   timeout=self.timeout,
-                                   verify=self.verify).text
-
+        sitemap = self._get_sitemap()
         pattern = r"<loc>https?://[^<]+</loc>"
         src_urls = re.findall(pattern, sitemap)
 
