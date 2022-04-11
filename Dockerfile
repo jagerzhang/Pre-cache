@@ -4,6 +4,6 @@ LABEL description="网站预缓存脚本，全量拉取sitemap里面的网址来
 WORKDIR /opt/
 COPY . .
 RUN python -m pip install --upgrade pip \
-    && pip install -r /opt/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ \
+    && pip install -r /opt/requirements.txt -i https://mirrors.tencent.com/pypi/simple/ \
     && rm -rf ~/.cache/pip/* 
 ENTRYPOINT ["python","/opt/pre_cache.py"]

@@ -16,8 +16,8 @@ docker run --rm --net=host -ti jagerzhang/pre-cache:latest \
 git clone https://github.com/jagerzhang/Pre-cache.git
 cd Pre-cache
 yum install -y python-pip
-pip install --upgrade pip -i https://mirrors.aliyun.com/pypi/simple/
-pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+pip install --upgrade pip -i https://mirrors.tencent.com/pypi/simple/
+pip install -r requirements.txt -i https://mirrors.tencent.com/pypi/simple/
 ```
 ### 打印帮助信息：
 ```
